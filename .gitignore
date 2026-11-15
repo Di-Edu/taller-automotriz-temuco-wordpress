@@ -1,0 +1,15 @@
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+
+# Secretos y respaldos (nunca subir credenciales)
+.env
+*.sql
+*.sql.gz
+wp-config.php
+*.log

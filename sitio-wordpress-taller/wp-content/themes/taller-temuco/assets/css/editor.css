@@ -1,0 +1,6 @@
+/* Estilos del editor de bloques para que el cliente vea el contenido como en el sitio. */
+body{font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#374151}
+h1,h2,h3{color:#111827;line-height:1.2}
+.lead{font-size:1.2rem;color:#111827}
+details{border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px}
+summary{font-weight:700}

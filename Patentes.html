@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registro de Patentes</title>
+<style>
+:root{
+  --bg:#f4f5f7; --card:#fff; --ink:#1c1f24; --muted:#6b7280; --line:#e3e5e8;
+  --brand:#1f4fd1; --brand-ink:#fff; --ok:#16803c; --wa:#1fa855; --danger:#c62828;
+  --plate:#fffbe6; --plate-line:#222;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#14161a; --card:#1d2026; --ink:#e8eaed; --muted:#9aa0a6; --line:#2e323a;
+    --brand:#5b8cff; --brand-ink:#0b0d10; --plate:#2a2716; --plate-line:#d8d2a8; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px}
+h1{font-size:1.15rem;margin:0;padding:14px 0 8px}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{flex:0 0 auto;border:0;background:none;color:var(--muted);font:inherit;font-weight:600;padding:10px 14px;border-bottom:3px solid transparent;cursor:pointer}
+nav button.on{color:var(--brand);border-color:var(--brand)}
+main{padding:20px 0 60px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:.85rem;font-weight:600;color:var(--muted);margin:10px 0 4px}
+input,textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+input:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:-1px}
+.big{font-size:1.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;background:var(--line);color:var(--ink)}
+.btn.pri{background:var(--brand);color:var(--brand-ink)}
+.btn.wa{background:var(--wa);color:#fff}
+.btn.call{background:var(--ok);color:#fff}
+.btn.del{background:none;color:var(--danger);border:1px solid var(--danger)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.plate{display:inline-block;background:var(--plate);border:2px solid var(--plate-line);border-radius:6px;padding:2px 10px;font-weight:800;letter-spacing:.12em;font-size:1.25rem;font-family:ui-monospace,Consolas,monospace}
+.res-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:12px 0 0}
+dt{color:var(--muted);font-size:.9rem}dd{margin:0}
+.muted{color:var(--muted)}.small{font-size:.85rem}
+.empty{text-align:center;color:var(--muted);padding:24px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}
+tr.click{cursor:pointer}tr.click:hover{background:var(--bg)}
+.tablewrap{overflow-x:auto}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.on{opacity:1}
+.warn{background:#fff4e5;color:#7a4b00;border-color:#f3c88b}
+@media (prefers-color-scheme: dark){.warn{background:#2d2312;color:#f3c88b;border-color:#5c4520}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>🅿️ Registro de Patentes</h1>
+  <nav>
+    <button data-tab="buscar" class="on">Buscar</button>
+    <button data-tab="inscribir">Inscribir</button>
+    <button data-tab="registros">Registros (<span id="count">0</span>)</button>
+    <button data-tab="respaldo">Respaldo / Importar</button>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <!-- BUSCAR -->
+  <section id="buscar" class="on">
+    <div class="card">
+      <label for="q">Patente, nombre o unidad</label>
+      <input id="q" class="big" placeholder="ABCD12" autocomplete="off" autofocus>
+    </div>
+    <div id="results"></div>
+  </section>
+
+  <!-- INSCRIBIR -->
+  <section id="inscribir">
+    <form id="form" class="card" autocomplete="off">
+      <h2 id="formTitle" style="margin:0 0 4px;font-size:1.1rem">Nueva inscripción</h2>
+      <input type="hidden" id="f_id">
+      <label for="f_patente">Patente *</label>
+      <input id="f_patente" class="big" required placeholder="ABCD12">
+      <div id="dupWarn" class="card warn small" style="display:none;margin:8px 0 0"></div>
+      <div class="grid">
+        <div><label for="f_nombre">Nombre *</label><input id="f_nombre" required></div>
+        <div><label for="f_telefono">Teléfono *</label><input id="f_telefono" type="tel" required placeholder="+56 9 1234 5678"></div>
+        <div><label for="f_unidad">Depto / Unidad</label><input id="f_unidad"></div>
+        <div><label for="f_vehiculo">Marca / Modelo</label><input id="f_vehiculo"></div>
+        <div><label for="f_color">Color</label><input id="f_color"></div>
+        <div><label for="f_correo">Correo</label><input id="f_correo" type="email"></div>
+      </div>
+      <label for="f_obs">Observaciones</label>
+      <textarea id="f_obs" rows="2"></textarea>
+      <div class="row">
+        <button class="btn pri" type="submit">Guardar</button>
+        <button class="btn" type="button" id="btnClear">Limpiar</button>
+        <button class="btn del" type="button" id="btnDelete" style="display:none;margin-left:auto">Eliminar</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- REGISTROS -->
+  <section id="registros">
+    <div class="card">
+      <input id="filter" placeholder="Filtrar…">
+      <div class="tablewrap" style="margin-top:12px">
+        <table><thead><tr><th>Patente</th><th>Nombre</th><th>Unidad</th><th>Teléfono</th><th>Vehículo</th></tr></thead>
+        <tbody id="tbody"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESPALDO -->
+  <section id="respaldo">
+    <div class="card">
+      <h2 style="margin:0;font-size:1.1rem">Importar desde Google Forms / Sheets</h2>
+      <p class="muted small">En la hoja de respuestas: <b>Archivo → Descargar → Valores separados por comas (.csv)</b>. Luego selecciónalo aquí. Las columnas se reconocen por nombre (patente, nombre, teléfono, depto, marca, color…).</p>
+      <input type="file" id="csvFile" accept=".csv,text/csv">
+      <div id="importInfo" class="small muted" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <h2 style="margin:0;font-size:1.1rem">Respaldo</h2>
+      <p class="muted small">Los datos se guardan solo en este navegador de este equipo. Descarga un respaldo de vez en cuando (y guárdalo en un pendrive o en tu Drive).</p>
+      <div class="row">
+        <button class="btn pri" id="btnExportJson">Descargar respaldo (.json)</button>
+        <button class="btn" id="btnExportCsv">Exportar a Excel (.csv)</button>
+      </div>
+      <label for="jsonFile">Restaurar respaldo (.json)</label>
+      <input type="file" id="jsonFile" accept=".json,application/json">
+      <p class="small muted" id="lastBackup"></p>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'patentes_db_v1';
+const $ = s => document.querySelector(s);
+let db = load();
+
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || [] }catch(e){ return [] } }
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(db)); }
+  catch(e){ alert('No se pudo guardar en el navegador. Descarga un respaldo ahora.'); }
+  $('#count').textContent = db.length;
+}
+const norm = s => (s||'').toString().toUpperCase().replace(/[^A-Z0-9]/g,'');
+const esc = s => (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove('on'),2200); }
+
+// Teléfono: deja solo dígitos y agrega 56 (Chile) si falta
+function phoneDigits(p){
+  let d = (p||'').replace(/\D/g,'');
+  if (!d) return '';
+  if (d.startsWith('00')) d = d.slice(2);
+  if (d.length === 9 && d.startsWith('9')) d = '56'+d;   // 912345678
+  if (d.length === 8) d = '569'+d;                          // 12345678
+  return d;
+}
+function fmtDate(v){ if(!v) return ''; if(!/^\d{4}-/.test(v)) return v.split(' ')[0]; const d=new Date(v); return isNaN(d)? v : d.toLocaleDateString('es-CL'); }
+
+// ---------- Tabs ----------
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+function showTab(id){
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab===id));
+  document.querySelectorAll('main section').forEach(s => s.classList.toggle('on', s.id===id));
+  if(id==='registros') renderTable();
+  if(id==='buscar') $('#q').focus();
+}
+
+// ---------- Buscar ----------
+function matches(r, q){
+  const nq = norm(q);
+  if (!nq) return false;
+  return norm(r.patente).includes(nq) || norm(r.nombre).includes(nq) || norm(r.unidad).includes(nq);
+}
+function resultCard(r){
+  const tel = phoneDigits(r.telefono);
+  return `<div class="card">
+    <div class="res-head"><span class="plate">${esc(r.patente)}</span><span class="muted small">Inscrito ${esc(fmtDate(r.fecha))}</span></div>
+    <dl>
+      <dt>Nombre</dt><dd><b>${esc(r.nombre)}</b></dd>
+      ${r.unidad?`<dt>Unidad</dt><dd>${esc(r.unidad)}</dd>`:''}
+      <dt>Teléfono</dt><dd>${esc(r.telefono)}</dd>
+      ${r.vehiculo?`<dt>Vehículo</dt><dd>${esc(r.vehiculo)}</dd>`:''}
+      ${r.color?`<dt>Color</dt><dd>${esc(r.color)}</dd>`:''}
+      ${r.correo?`<dt>Correo</dt><dd>${esc(r.correo)}</dd>`:''}
+      ${r.obs?`<dt>Obs.</dt><dd>${esc(r.obs)}</dd>`:''}
+    </dl>
+    <div class="row">
+      ${tel?`<a class="btn wa" href="https://wa.me/${tel}" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn call" href="tel:+${tel}">Llamar</a>`:''}
+      <button class="btn" onclick="editRecord('${r.id}')">Editar</button>
+    </div>
+  </div>`;
+}
+function renderResults(){
+  const q = $('#q').value;
+  const box = $('#results');
+  if (!norm(q)) { box.innerHTML = `<p class="empty">Escribe una patente para buscar.<br><span class="small">${db.length} vehículos registrados</span></p>`; return; }
+  const exact = db.filter(r => norm(r.patente)===norm(q));
+  const rest = db.filter(r => norm(r.patente)!==norm(q) && matches(r,q));
+  const list = exact.concat(rest).slice(0,30);
+  box.innerHTML = list.length ? list.map(resultCard).join('')
+    : `<div class="card empty">No se encontró <span class="plate">${esc(norm(q))}</span><div class="row" style="justify-content:center"><button class="btn pri" onclick="newWithPlate('${esc(norm(q))}')">Inscribir esta patente</button></div></div>`;
+}
+$('#q').addEventListener('input', renderResults);
+
+// ---------- Inscribir ----------
+const F = ['patente','nombre','telefono','unidad','vehiculo','color','correo','obs'];
+function clearForm(){
+  $('#form').reset(); $('#f_id').value='';
+  $('#formTitle').textContent='Nueva inscripción'; $('#btnDelete').style.display='none'; $('#dupWarn').style.display='none';
+}
+window.newWithPlate = p => { clearForm(); $('#f_patente').value=p; showTab('inscribir'); $('#f_nombre').focus(); };
+window.editRecord = id => {
+  const r = db.find(x=>x.id===id); if(!r) return;
+  clearForm(); $('#f_id').value=r.id; F.forEach(k=>$('#f_'+k).value=r[k]||'');
+  $('#formTitle').textContent='Editar inscripción'; $('#btnDelete').style.display='';
+  showTab('inscribir');
+};
+$('#f_patente').addEventListener('input', () => {
+  const p = norm($('#f_patente').value), id = $('#f_id').value;
+  const d = db.find(r => norm(r.patente)===p && r.id!==id);
+  const w = $('#dupWarn');
+  if (p && d){ w.innerHTML = `Esta patente ya está inscrita a nombre de <b>${esc(d.nombre)}</b>. <a href="#" onclick="editRecord('${d.id}');return false">Editar ese registro</a>`; w.style.display=''; }
+  else w.style.display='none';
+});
+$('#form').addEventListener('submit', e => {
+  e.preventDefault();
+  const rec = {}; F.forEach(k => rec[k] = $('#f_'+k).value.trim());
+  rec.patente = norm(rec.patente);
+  const id = $('#f_id').value;
+  if (!id && db.some(r=>norm(r.patente)===rec.patente)){ if(!confirm('Esa patente ya existe. ¿Guardar otro registro igual?')) return; }
+  if (id){ const i = db.findIndex(r=>r.id===id); db[i] = {...db[i], ...rec, editado:new Date().toISOString()}; }
+  else db.push({id:uid(), fecha:new Date().toISOString(), ...rec});
+  save(); toast(id?'Registro actualizado':'Patente inscrita'); clearForm();
+  $('#q').value = rec.patente; showTab('buscar'); renderResults();
+});
+$('#btnClear').onclick = clearForm;
+$('#btnDelete').onclick = () => {
+  const id=$('#f_id').value, r=db.find(x=>x.id===id);
+  if (r && confirm(`¿Eliminar la patente ${r.patente} (${r.nombre})?`)){ db=db.filter(x=>x.id!==id); save(); clearForm(); toast('Registro eliminado'); showTab('registros'); }
+};
+
+// ---------- Registros ----------
+function renderTable(){
+  const f = $('#filter').value;
+  const rows = (norm(f)? db.filter(r=>matches(r,f) || norm(r.telefono).includes(norm(f))) : db.slice())
+    .sort((a,b)=>a.patente.localeCompare(b.patente));
+  $('#tbody').innerHTML = rows.map(r=>`<tr class="click" onclick="editRecord('${r.id}')"><td><b>${esc(r.patente)}</b></td><td>${esc(r.nombre)}</td><td>${esc(r.unidad)}</td><td>${esc(r.telefono)}</td><td>${esc([r.vehiculo,r.color].filter(Boolean).join(' · '))}</td></tr>`).join('')
+    || `<tr><td colspan="5" class="empty">Sin registros</td></tr>`;
+}
+$('#filter').addEventListener('input', renderTable);
+
+// ---------- CSV ----------
+function parseCSV(text){
+  if (text.charCodeAt(0)===0xFEFF) text=text.slice(1);
+  const sep = (text.split('\n')[0].split(';').length > text.split('\n')[0].split(',').length) ? ';' : ',';
+  const rows=[]; let row=[], cell='', q=false;
+  for (let i=0;i<text.length;i++){
+    const c=text[i];
+    if (q){ if(c==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else q=false; } else cell+=c; }
+    else if (c==='"') q=true;
+    else if (c===sep){ row.push(cell); cell=''; }
+    else if (c==='\n' || c==='\r'){ if(c==='\r'&&text[i+1]==='\n') i++; row.push(cell); rows.push(row); row=[]; cell=''; }
+    else cell+=c;
+  }
+  if (cell||row.length){ row.push(cell); rows.push(row); }
+  return rows.filter(r=>r.some(x=>x.trim()));
+}
+const COLS = {
+  fecha:/marca temporal|timestamp|fecha/,
+  patente:/patente|placa|ppu/, nombre:/nombre|propietario|due[ñn]o|conductor/, telefono:/tel[eé]fono|fono|celular|whats|m[oó]vil/,
+  unidad:/depto|departamento|unidad|casa|oficina|local|n[uú]mero de/, vehiculo:/marca|modelo|veh[ií]culo|auto/,
+  color:/color/, correo:/correo|mail/, obs:/observ|coment|nota/
+};
+$('#csvFile').addEventListener('change', async e => {
+  const file=e.target.files[0]; if(!file) return;
+  const rows=parseCSV(await file.text()); const head=rows.shift()||[];
+  const map={}; head.forEach((h,i)=>{ const hl=h.toLowerCase();
+    for (const k in COLS) if(!(k in map) && COLS[k].test(hl)){ map[k]=i; break; } });
+  if (!('patente' in map)){ alert('No encontré una columna de "Patente". Columnas: '+head.join(' | ')); return; }
+  const vehCols = head.map((h,i)=>/marca|modelo/i.test(h) && !/temporal/i.test(h)?i:-1).filter(i=>i>=0);
+  let add=0, upd=0;
+  rows.forEach(r=>{
+    const rec={}; for(const k in map) rec[k]=(r[map[k]]||'').trim();
+    if (vehCols.length>1) rec.vehiculo = vehCols.map(i=>(r[i]||'').trim()).filter(Boolean).join(' ');
+    rec.patente=norm(rec.patente); if(!rec.patente) return;
+    const ex=db.find(x=>norm(x.patente)===rec.patente);
+    if (ex){ Object.assign(ex, Object.fromEntries(Object.entries(rec).filter(([,v])=>v))); upd++; }
+    else { db.push({id:uid(), fecha:rec.fecha||new Date().toISOString(), ...rec}); add++; }
+  });
+  save(); e.target.value='';
+  $('#importInfo').innerHTML = `✔ ${add} nuevos, ${upd} actualizados. Columnas usadas: ${Object.entries(map).map(([k,i])=>`${k} ← "${esc(head[i])}"`).join(', ')}`;
+  toast('Importación lista');
+});
+
+// ---------- Respaldo ----------
+function download(name, content, type){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+const stamp = () => new Date().toISOString().slice(0,10);
+$('#btnExportJson').onclick = () => {
+  download(`respaldo-patentes-${stamp()}.json`, JSON.stringify(db,null,1), 'application/json');
+  try{ localStorage.setItem(KEY+'_lastbackup', new Date().toISOString()); }catch(e){} showLastBackup();
+};
+$('#btnExportCsv').onclick = () => {
+  const cols=['patente','nombre','telefono','unidad','vehiculo','color','correo','obs','fecha'];
+  const q=v=>'"'+(v||'').toString().replace(/"/g,'""')+'"';
+  download(`patentes-${stamp()}.csv`, '﻿'+[cols.join(';'), ...db.map(r=>cols.map(c=>q(r[c])).join(';'))].join('\r\n'), 'text/csv');
+};
+$('#jsonFile').addEventListener('change', async e => {
+  const file=e.target.files[0]; if(!file) return;
+  try{
+    const data=JSON.parse(await file.text()); if(!Array.isArray(data)) throw 0;
+    if (confirm(`El respaldo tiene ${data.length} registros. ¿Reemplazar los ${db.length} actuales?`)){ db=data; save(); toast('Respaldo restaurado'); }
+  }catch(err){ alert('Archivo de respaldo no válido.'); }
+  e.target.value='';
+});
+function showLastBackup(){
+  let t=null; try{ t=localStorage.getItem(KEY+'_lastbackup'); }catch(e){}
+  $('#lastBackup').textContent = t ? 'Último respaldo: '+new Date(t).toLocaleString('es-CL') : 'Aún no has descargado un respaldo.';
+}
+
+save(); renderResults(); showLastBackup();
+</script>
+</body>
+</html>

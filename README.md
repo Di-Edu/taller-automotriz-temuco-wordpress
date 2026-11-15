@@ -1,0 +1,20 @@
+# Proyectos
+
+Este repositorio reúne dos proyectos:
+
+## 1. [Sitio WordPress para servicio automotriz en Temuco](sitio-wordpress-taller/)
+
+Sitio WordPress 100% autoadministrable, orientado a conversión y SEO local:
+
+- Tema a medida **Taller Temuco**: Home de conversión, 8 páginas de servicio con SEO local, botón de WhatsApp, SEO básico (títulos, meta descripciones, schema `AutoRepair`) y optimización de velocidad.
+- Plugin **Taller Agenda**: reserva de horas con disponibilidad en tiempo real y gestión de citas en el escritorio de WordPress.
+- Entorno local con Docker y checklist de entrega de accesos.
+
+Detalle completo en [`sitio-wordpress-taller/README.md`](sitio-wordpress-taller/README.md).
+
+## 2. Registro de Patentes
+
+App web para registrar y buscar vehículos por patente (por ejemplo, en un estacionamiento), con contacto directo por WhatsApp.
+
+- [`Patentes.html`](Patentes.html): versión sin servidor que guarda los datos en el navegador, con importación desde Google Forms (CSV) y respaldos.
+- [`Version Online/`](Version%20Online/): versión en Google Apps Script que guarda en Google Sheets, con acceso por PIN. Instrucciones en [`GUIA DE INSTALACION.md`](Version%20Online/GUIA%20DE%20INSTALACION.md).
