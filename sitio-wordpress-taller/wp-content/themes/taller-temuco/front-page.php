@@ -162,21 +162,16 @@ endwhile;
 ?>
 
 <section class="section section-alt" id="ubicacion">
-	<div class="container split">
-		<div>
-			<p class="kicker"><?php esc_html_e( 'Cobertura', 'taller-temuco' ); ?></p>
-			<h2><?php esc_html_e( 'Atendemos Temuco y alrededores', 'taller-temuco' ); ?></h2>
-			<ul class="chips">
+	<div class="container">
+		<header class="section-head">
+			<p class="kicker"><?php echo count( tt_branches() ) > 1 ? esc_html__( 'Sucursales', 'taller-temuco' ) : esc_html__( 'Ubicación', 'taller-temuco' ); ?></p>
+			<h2><?php esc_html_e( 'Encuéntranos en Temuco y alrededores', 'taller-temuco' ); ?></h2>
+			<ul class="chips chips-center">
 				<?php foreach ( array_filter( array_map( 'trim', explode( ',', (string) tt_opt( 'areas' ) ) ) ) as $a ) : ?>
 					<li><?php echo esc_html( $a ); ?></li>
 				<?php endforeach; ?>
 			</ul>
-			<ul class="contact-list">
-				<li><?php echo tt_icon( 'pin' ); // phpcs:ignore ?> <?php echo esc_html( tt_opt( 'address' ) ); ?></li>
-				<li><?php echo tt_icon( 'clock' ); // phpcs:ignore ?> <?php echo esc_html( tt_opt( 'hours' ) ); ?></li>
-				<li><a href="<?php echo esc_url( tt_tel_href() ); ?>"><?php echo tt_icon( 'phone' ); // phpcs:ignore ?> <?php echo esc_html( tt_opt( 'phone' ) ); ?></a></li>
-			</ul>
-		</div>
+		</header>
 		<?php get_template_part( 'template-parts/map' ); ?>
 	</div>
 </section>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Formulario público [taller_agenda].
+ * Formulario público [taller_agenda] con calendario de disponibilidad.
  *
  * @package TallerAgenda
  */
@@ -19,6 +19,28 @@ class TTA_Form {
 		add_shortcode( 'taller_agenda', array( __CLASS__, 'render' ) );
 		add_action( 'admin_post_nopriv_tta_submit', array( __CLASS__, 'handle' ) );
 		add_action( 'admin_post_tta_submit', array( __CLASS__, 'handle' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'maybe_enqueue' ) );
+	}
+
+	/**
+	 * Registra los archivos; solo se cargan en páginas que usan [taller_agenda].
+	 */
+	public static function register_assets() {
+		$url = plugin_dir_url( TTA_FILE ) . 'assets/';
+		wp_register_style( 'taller-agenda', $url . 'agenda.css', array(), TTA_VERSION );
+		wp_register_script( 'taller-agenda', $url . 'agenda.js', array(), TTA_VERSION, array( 'strategy' => 'defer', 'in_footer' => true ) );
+	}
+
+	/**
+	 * Carga el CSS en <head> si la página contiene el shortcode (evita parpadeo).
+	 */
+	public static function maybe_enqueue() {
+		self::register_assets();
+		$post = get_post();
+		if ( is_singular() && $post && has_shortcode( $post->post_content, 'taller_agenda' ) ) {
+			wp_enqueue_style( 'taller-agenda' );
+			wp_enqueue_script( 'taller-agenda' );
+		}
 	}
 
 	/**
@@ -55,6 +77,7 @@ class TTA_Form {
 		};
 
 		$data = array(
+			'sucursal' => $field( 'tta_sucursal' ),
 			'nombre'   => $field( 'tta_nombre' ),
 			'telefono' => preg_replace( '/[^\d+ ]/', '', $field( 'tta_telefono' ) ),
 			'email'    => sanitize_email( $field( 'tta_email' ) ),
@@ -87,6 +110,7 @@ class TTA_Form {
 				'ok'   => 1,
 				'data' => array(
 					'servicio' => get_post_meta( $result, '_tta_servicio', true ),
+					'sucursal' => get_post_meta( $result, '_tta_sucursal_nombre', true ),
 					'fecha'    => $data['fecha'],
 					'hora'     => $data['hora'],
 					'nombre'   => $data['nombre'],
@@ -102,6 +126,12 @@ class TTA_Form {
 	 * HTML del formulario.
 	 */
 	public static function render() {
+		if ( ! wp_style_is( 'taller-agenda', 'registered' ) ) {
+			self::register_assets();
+		}
+		wp_enqueue_style( 'taller-agenda' );
+		wp_enqueue_script( 'taller-agenda' );
+
 		$state = isset( $_GET['tta'] ) ? sanitize_key( $_GET['tta'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
 		$key   = isset( $_GET['tta_k'] ) ? sanitize_key( $_GET['tta_k'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
 		$flash = $key ? get_transient( 'tta_f_' . $key ) : false;
@@ -117,6 +147,12 @@ class TTA_Form {
 			$selected = sanitize_text_field( wp_unslash( $_GET['servicio'] ) ); // phpcs:ignore
 		}
 
+		$branches   = TTA_Settings::branches();
+		$branch_sel = $v( 'sucursal' );
+		if ( ! $branch_sel && isset( $_GET['sucursal'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$branch_sel = (string) absint( $_GET['sucursal'] ); // phpcs:ignore
+		}
+
 		$now  = current_datetime();
 		$min  = $now->modify( '+' . (int) TTA_Settings::get( 'min_hours' ) . ' hours' )->format( 'Y-m-d' );
 		$max  = $now->modify( '+' . (int) TTA_Settings::get( 'max_days' ) . ' days' )->format( 'Y-m-d' );
@@ -129,10 +165,10 @@ class TTA_Form {
 			<div class="tta-alert tta-alert-ok" role="status">
 				<p><?php echo esc_html( TTA_Settings::get( 'confirm_text' ) ); ?></p>
 				<?php if ( $flash && ! empty( $flash['ok'] ) ) : ?>
-					<p><strong><?php echo esc_html( $old['servicio'] ); ?></strong> · <?php echo esc_html( TTA_Booking::human_date( $old['fecha'] ) . ' · ' . $old['hora'] ); ?></p>
+					<p><strong><?php echo esc_html( $old['servicio'] ); ?></strong><?php echo $old['sucursal'] ? ' · ' . esc_html( $old['sucursal'] ) : ''; ?> · <?php echo esc_html( TTA_Booking::human_date( $old['fecha'] ) . ' · ' . $old['hora'] ); ?></p>
 					<?php
 					if ( function_exists( 'tt_whatsapp_url' ) ) :
-						$msg = sprintf( 'Hola, soy %s. Acabo de solicitar hora para %s el %s a las %s.', $old['nombre'], $old['servicio'], TTA_Booking::human_date( $old['fecha'] ), $old['hora'] );
+						$msg = sprintf( 'Hola, soy %s. Acabo de solicitar hora para %s el %s a las %s%s.', $old['nombre'], $old['servicio'], TTA_Booking::human_date( $old['fecha'] ), $old['hora'], $old['sucursal'] ? ' en ' . $old['sucursal'] : '' );
 						?>
 						<p><a class="btn btn-wa" href="<?php echo esc_url( tt_whatsapp_url( $msg ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Confirmar más rápido por WhatsApp', 'taller-agenda' ); ?></a></p>
 					<?php endif; ?>
@@ -142,14 +178,30 @@ class TTA_Form {
 			<?php if ( 'error' === $state && $flash && isset( $flash['msg'] ) ) : ?>
 				<div class="tta-alert tta-alert-err" role="alert"><?php echo esc_html( $flash['msg'] ); ?></div>
 			<?php endif; ?>
-			<form class="tta-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-rest="<?php echo esc_url( rest_url( 'taller-agenda/v1/horarios' ) ); ?>" data-hora="<?php echo esc_attr( $v( 'hora' ) ); ?>">
+			<form class="tta-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+				data-rest-mes="<?php echo esc_url( rest_url( 'taller-agenda/v1/mes' ) ); ?>"
+				data-rest-horarios="<?php echo esc_url( rest_url( 'taller-agenda/v1/horarios' ) ); ?>"
+				data-min="<?php echo esc_attr( $min ); ?>" data-max="<?php echo esc_attr( $max ); ?>"
+				data-today="<?php echo esc_attr( $now->format( 'Y-m-d' ) ); ?>">
 				<input type="hidden" name="action" value="tta_submit">
 				<input type="hidden" name="tta_back" value="<?php echo esc_url( $back ); ?>">
 				<?php wp_nonce_field( 'tta_submit', 'tta_nonce' ); ?>
 				<div class="tta-hp" aria-hidden="true"><label>Web <input type="text" name="tta_web" tabindex="-1" autocomplete="off"></label></div>
 
 				<div class="tta-grid">
-					<div class="tta-full">
+					<?php if ( count( $branches ) > 1 ) : ?>
+						<div>
+							<label for="tta_sucursal"><?php esc_html_e( 'Sucursal', 'taller-agenda' ); ?> *</label>
+							<select id="tta_sucursal" name="tta_sucursal" required>
+								<?php foreach ( $branches as $id => $name ) : ?>
+									<option value="<?php echo esc_attr( $id ); ?>" <?php selected( (string) $branch_sel, (string) $id ); ?>><?php echo esc_html( $name ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+					<?php elseif ( $branches ) : ?>
+						<input type="hidden" name="tta_sucursal" value="<?php echo esc_attr( key( $branches ) ); ?>">
+					<?php endif; ?>
+					<div class="<?php echo count( $branches ) > 1 ? '' : 'tta-full'; ?>">
 						<label for="tta_servicio"><?php esc_html_e( 'Servicio', 'taller-agenda' ); ?> *</label>
 						<select id="tta_servicio" name="tta_servicio" required>
 							<option value=""><?php esc_html_e( 'Selecciona un servicio…', 'taller-agenda' ); ?></option>
@@ -158,16 +210,33 @@ class TTA_Form {
 							<?php endforeach; ?>
 						</select>
 					</div>
-					<div>
-						<label for="tta_fecha"><?php esc_html_e( 'Día', 'taller-agenda' ); ?> *</label>
-						<input type="date" id="tta_fecha" name="tta_fecha" min="<?php echo esc_attr( $min ); ?>" max="<?php echo esc_attr( $max ); ?>" value="<?php echo esc_attr( $v( 'fecha' ) ); ?>" required>
+
+					<div class="tta-full">
+						<span class="tta-label" id="tta_cal_label"><?php esc_html_e( 'Elige el día', 'taller-agenda' ); ?> *</span>
+						<div class="tta-cal" role="group" aria-labelledby="tta_cal_label">
+							<div class="tta-cal-head">
+								<button type="button" class="tta-cal-nav" data-dir="-1" aria-label="<?php esc_attr_e( 'Mes anterior', 'taller-agenda' ); ?>">‹</button>
+								<span class="tta-cal-title" aria-live="polite"></span>
+								<button type="button" class="tta-cal-nav" data-dir="1" aria-label="<?php esc_attr_e( 'Mes siguiente', 'taller-agenda' ); ?>">›</button>
+							</div>
+							<div class="tta-cal-grid"></div>
+							<ul class="tta-legend">
+								<li><i class="is-free"></i><?php esc_html_e( 'Disponible', 'taller-agenda' ); ?></li>
+								<li><i class="is-few"></i><?php esc_html_e( 'Pocos cupos', 'taller-agenda' ); ?></li>
+								<li><i class="is-full"></i><?php esc_html_e( 'Completo', 'taller-agenda' ); ?></li>
+								<li><i class="is-closed"></i><?php esc_html_e( 'Sin atención', 'taller-agenda' ); ?></li>
+							</ul>
+						</div>
+						<input type="hidden" name="tta_fecha" value="<?php echo esc_attr( $v( 'fecha' ) ); ?>">
+						<noscript><p class="tta-inline-err"><?php esc_html_e( 'Para ver el calendario activa JavaScript, o agenda por WhatsApp.', 'taller-agenda' ); ?></p></noscript>
 					</div>
-					<div>
-						<label for="tta_hora"><?php esc_html_e( 'Horario', 'taller-agenda' ); ?> *</label>
-						<select id="tta_hora" name="tta_hora" required>
-							<option value=""><?php esc_html_e( 'Primero elige el día', 'taller-agenda' ); ?></option>
-						</select>
+
+					<div class="tta-full">
+						<span class="tta-label"><?php esc_html_e( 'Elige el horario', 'taller-agenda' ); ?> *</span>
+						<div class="tta-slots" aria-live="polite"><p class="tta-hint"><?php esc_html_e( 'Primero elige un día disponible en el calendario.', 'taller-agenda' ); ?></p></div>
+						<input type="hidden" name="tta_hora" value="<?php echo esc_attr( $v( 'hora' ) ); ?>">
 					</div>
+
 					<div>
 						<label for="tta_nombre"><?php esc_html_e( 'Nombre', 'taller-agenda' ); ?> *</label>
 						<input type="text" id="tta_nombre" name="tta_nombre" autocomplete="name" value="<?php echo esc_attr( $v( 'nombre' ) ); ?>" required>
@@ -193,38 +262,9 @@ class TTA_Form {
 						<textarea id="tta_mensaje" name="tta_mensaje" rows="3" maxlength="1000"><?php echo esc_textarea( $v( 'mensaje' ) ); ?></textarea>
 					</div>
 				</div>
-				<button type="submit" class="btn btn-primary btn-lg"><?php esc_html_e( 'Solicitar hora', 'taller-agenda' ); ?></button>
+				<button type="submit" class="tta-submit"><?php esc_html_e( 'Solicitar hora', 'taller-agenda' ); ?></button>
 				<p class="tta-note"><?php esc_html_e( 'Sin costo ni compromiso. Te confirmaremos la hora por WhatsApp o teléfono.', 'taller-agenda' ); ?></p>
 			</form>
-			<script>
-			(function () {
-				var form = document.currentScript.previousElementSibling;
-				var day = form.querySelector('#tta_fecha'), hour = form.querySelector('#tta_hora');
-				var wanted = form.getAttribute('data-hora');
-				function opt(v, t, dis) { var o = document.createElement('option'); o.value = v; o.textContent = t; if (dis) o.disabled = true; return o; }
-				function load() {
-					hour.innerHTML = ''; hour.appendChild(opt('', 'Cargando horarios…', true));
-					if (!day.value) { hour.innerHTML = ''; hour.appendChild(opt('', 'Primero elige el día')); return; }
-					fetch(form.getAttribute('data-rest') + '?fecha=' + encodeURIComponent(day.value), { credentials: 'same-origin' })
-						.then(function (r) { return r.json(); })
-						.then(function (d) {
-							var list = (d && d.horarios) || [], free = list.filter(function (s) { return s.disponible; });
-							hour.innerHTML = '';
-							if (!list.length) { hour.appendChild(opt('', 'No atendemos este día, elige otro')); return; }
-							if (!free.length) { hour.appendChild(opt('', 'Día completo, elige otro')); return; }
-							hour.appendChild(opt('', 'Elige un horario'));
-							list.forEach(function (s) {
-								var o = opt(s.hora, s.hora + (s.disponible ? '' : ' (ocupado)'), !s.disponible);
-								if (s.hora === wanted && s.disponible) o.selected = true;
-								hour.appendChild(o);
-							});
-						})
-						.catch(function () { hour.innerHTML = ''; hour.appendChild(opt('', 'No se pudieron cargar los horarios')); });
-				}
-				day.addEventListener('change', function () { wanted = ''; load(); });
-				if (day.value) load();
-			})();
-			</script>
 		<?php endif; ?>
 		</div>
 		<?php

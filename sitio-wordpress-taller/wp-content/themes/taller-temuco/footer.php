@@ -31,7 +31,9 @@ defined( 'ABSPATH' ) || exit;
 		<div>
 			<h3 class="footer-title"><?php esc_html_e( 'Contacto', 'taller-temuco' ); ?></h3>
 			<ul class="footer-links">
-				<li><?php echo tt_icon( 'pin' ); // phpcs:ignore ?> <?php echo esc_html( tt_opt( 'address' ) ); ?></li>
+				<?php foreach ( tt_branches() as $tt_b ) : ?>
+					<li><a href="<?php echo esc_url( $tt_b['directions'] ); ?>" target="_blank" rel="noopener"><?php echo tt_icon( 'pin' ); // phpcs:ignore ?> <?php echo esc_html( ( count( tt_branches() ) > 1 ? $tt_b['name'] . ': ' : '' ) . $tt_b['full_address'] ); ?></a></li>
+				<?php endforeach; ?>
 				<li><?php echo tt_icon( 'clock' ); // phpcs:ignore ?> <?php echo esc_html( tt_opt( 'hours' ) ); ?></li>
 				<li><a href="<?php echo esc_url( tt_tel_href() ); ?>"><?php echo tt_icon( 'phone' ); // phpcs:ignore ?> <?php echo esc_html( tt_opt( 'phone' ) ); ?></a></li>
 				<li><a href="<?php echo esc_url( tt_whatsapp_url() ); ?>" target="_blank" rel="noopener"><?php echo tt_icon( 'whatsapp' ); // phpcs:ignore ?> WhatsApp</a></li>
@@ -68,6 +70,7 @@ defined( 'ABSPATH' ) || exit;
 <nav class="mobile-cta" aria-label="<?php esc_attr_e( 'Acciones rápidas', 'taller-temuco' ); ?>">
 	<a href="<?php echo esc_url( tt_tel_href() ); ?>" data-track="call_bar"><?php echo tt_icon( 'phone' ); // phpcs:ignore ?><span><?php esc_html_e( 'Llamar', 'taller-temuco' ); ?></span></a>
 	<a href="<?php echo esc_url( tt_whatsapp_url() ); ?>" target="_blank" rel="noopener" data-track="whatsapp_bar"><?php echo tt_icon( 'whatsapp' ); // phpcs:ignore ?><span>WhatsApp</span></a>
+	<a href="<?php echo esc_url( tt_location_url() ); ?>" data-track="location_bar"><?php echo tt_icon( 'pin' ); // phpcs:ignore ?><span><?php esc_html_e( 'Ubicación', 'taller-temuco' ); ?></span></a>
 	<a href="<?php echo esc_url( tt_booking_url() ); ?>" class="is-primary" data-track="booking_bar"><?php echo tt_icon( 'calendar' ); // phpcs:ignore ?><span><?php esc_html_e( 'Agendar', 'taller-temuco' ); ?></span></a>
 </nav>
 

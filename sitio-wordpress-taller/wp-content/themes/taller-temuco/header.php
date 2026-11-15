@@ -20,7 +20,18 @@ defined( 'ABSPATH' ) || exit;
 
 <div class="topbar">
 	<div class="container topbar-inner">
-		<span><?php echo tt_icon( 'pin' ); // phpcs:ignore ?> <?php echo esc_html( tt_opt( 'address' ) ); ?></span>
+		<?php $tt_nb = count( tt_branches() ); ?>
+		<a class="topbar-location" href="<?php echo esc_url( tt_location_url() ); ?>" data-track="location_topbar">
+			<?php echo tt_icon( 'pin' ); // phpcs:ignore ?>
+			<?php
+			if ( $tt_nb > 1 ) {
+				/* translators: %d: número de sucursales */
+				echo esc_html( sprintf( __( '%d sucursales · Ver mapa', 'taller-temuco' ), $tt_nb ) );
+			} else {
+				echo esc_html( tt_branches()[0]['full_address'] ) . ' · <u>' . esc_html__( 'Cómo llegar', 'taller-temuco' ) . '</u>';
+			}
+			?>
+		</a>
 		<span class="hide-sm"><?php echo tt_icon( 'clock' ); // phpcs:ignore ?> <?php echo esc_html( tt_opt( 'hours' ) ); ?></span>
 	</div>
 </div>

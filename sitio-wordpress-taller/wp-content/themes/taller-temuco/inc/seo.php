@@ -248,6 +248,40 @@ function tt_schema_output() {
 	if ( $same ) {
 		$business['sameAs'] = $same;
 	}
+	// Cada sucursal se declara como establecimiento propio (ayuda a aparecer en Google Maps por comuna).
+	$branches = tt_branches( false );
+	if ( count( $branches ) > 1 ) {
+		$business['department'] = array();
+		foreach ( $branches as $b ) {
+			$dep = array(
+				'@type'     => 'AutoRepair',
+				'name'      => $b['name'],
+				'telephone' => $b['phone'],
+				'address'   => array(
+					'@type'           => 'PostalAddress',
+					'streetAddress'   => $b['address'],
+					'addressLocality' => $b['city'] ? $b['city'] : 'Temuco',
+					'addressRegion'   => 'Araucanía',
+					'addressCountry'  => 'CL',
+				),
+			);
+			if ( null !== $b['lat'] ) {
+				$dep['geo'] = array(
+					'@type'     => 'GeoCoordinates',
+					'latitude'  => $b['lat'],
+					'longitude' => $b['lng'],
+				);
+			}
+			$business['department'][] = $dep;
+		}
+	} elseif ( $branches && null !== $branches[0]['lat'] ) {
+		$business['address']['streetAddress'] = $branches[0]['address'];
+		$business['geo']                      = array(
+			'@type'     => 'GeoCoordinates',
+			'latitude'  => $branches[0]['lat'],
+			'longitude' => $branches[0]['lng'],
+		);
+	}
 	$graph[] = $business;
 
 	if ( is_page() && is_page_template( 'page-servicio.php' ) ) {

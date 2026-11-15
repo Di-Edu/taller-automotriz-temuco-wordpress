@@ -6,7 +6,7 @@
   "steps": [
     { "step": "login" },
     { "step": "setSiteLanguage", "language": "es_CL" },
-    { "step": "setSiteOptions", "options": { "blogname": "Taller Automotriz Temuco", "blogdescription": "Servicio automotriz en Temuco" } },
+    { "step": "setSiteOptions", "options": { "blogname": "Taller Automotriz Temuco", "blogdescription": "Servicio automotriz en Temuco", "timezone_string": "America/Santiago" } },
     {
       "step": "installPlugin",
       "pluginData": {
@@ -28,6 +28,10 @@
         "path": "sitio-wordpress-taller/wp-content/themes/taller-temuco"
       },
       "options": { "activate": true }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; /* Datos SOLO para la demo: segunda sucursal y citas de ejemplo para ver el calendario con horarios ocupados. */ if ( function_exists( 'tt_seed_branches' ) ) { tt_seed_branches(); } $b2 = wp_insert_post( array( 'post_type' => 'tt_sucursal', 'post_status' => 'publish', 'post_title' => 'Sucursal Padre Las Casas', 'menu_order' => 1 ) ); foreach ( array( 'address' => 'Av. Maquehue 0000', 'city' => 'Padre Las Casas', 'hours' => 'Lunes a viernes 9:00-18:00', 'lat' => '-38.7656', 'lng' => '-72.5948' ) as $k => $v ) { update_post_meta( $b2, '_tt_b_' . $k, $v ); } $main = get_posts( array( 'post_type' => 'tt_sucursal', 'orderby' => 'menu_order', 'order' => 'ASC', 'posts_per_page' => 1 ) ); $m = $main[0]->ID; $next = function ( $d ) { do { $d->modify( '+1 day' ); } while ( (int) $d->format( 'N' ) > 5 ); return $d; }; $d = new DateTime( 'now', wp_timezone() ); $d->modify( '+1 day' ); $full = $next( $d )->format( 'Y-m-d' ); $few = $next( $d )->format( 'Y-m-d' ); $names = array( 'Camila R.', 'Jorge P.', 'Valentina S.', 'Matias C.', 'Fernanda L.', 'Ignacio M.' ); $i = 0; $mk = function ( $date, $h ) use ( $m, &$i, $names ) { $id = wp_insert_post( array( 'post_type' => 'tta_cita', 'post_status' => 'publish', 'post_title' => $names[ $i % 6 ] . ' - Demo' ) ); $meta = array( 'nombre' => $names[ $i % 6 ], 'telefono' => '900000000', 'servicio' => 'Mantención automotriz', 'fecha' => $date, 'hora' => $h, 'estado' => ( $i % 3 ) ? 'confirmada' : 'pendiente', 'sucursal' => (string) $m, 'sucursal_nombre' => get_the_title( $m ) ); foreach ( $meta as $k => $v ) { update_post_meta( $id, '_tta_' . $k, $v ); } $i++; }; foreach ( array( '09:00', '10:00', '11:00', '12:00', '14:30', '15:30', '16:30', '17:30' ) as $h ) { $mk( $full, $h ); $mk( $full, $h ); } foreach ( array( '09:00', '10:00', '11:00', '12:00', '14:30', '15:30' ) as $h ) { $mk( $few, $h ); $mk( $few, $h ); }"
     }
   ]
 }

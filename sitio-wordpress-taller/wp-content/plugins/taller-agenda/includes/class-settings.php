@@ -77,6 +77,40 @@ class TTA_Settings {
 	}
 
 	/**
+	 * Sucursales (del tema Taller Temuco, menú "Sucursales"). Vacío = una sola ubicación.
+	 * Los cupos por horario se cuentan por sucursal.
+	 *
+	 * @return array id => nombre
+	 */
+	public static function branches() {
+		$out = array();
+		if ( function_exists( 'tt_branches' ) ) {
+			foreach ( tt_branches( false ) as $b ) {
+				$out[ (string) $b['id'] ] = $b['name'];
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Normaliza la sucursal recibida: '' si no hay sucursales; la única si hay una sola.
+	 *
+	 * @param mixed $id Valor recibido.
+	 * @return string '' | id válido | 'invalid'
+	 */
+	public static function branch_id( $id ) {
+		$branches = self::branches();
+		if ( ! $branches ) {
+			return '';
+		}
+		if ( 1 === count( $branches ) ) {
+			return (string) key( $branches );
+		}
+		$id = (string) absint( $id );
+		return isset( $branches[ $id ] ) ? $id : 'invalid';
+	}
+
+	/**
 	 * Hooks.
 	 */
 	public static function init() {
