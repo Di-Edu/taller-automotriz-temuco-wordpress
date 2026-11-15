@@ -17,6 +17,7 @@ require TT_DIR . '/inc/branches.php';
 require TT_DIR . '/inc/seo.php';
 require TT_DIR . '/inc/performance.php';
 require TT_DIR . '/inc/setup-content.php';
+require TT_DIR . '/inc/woocommerce.php';
 
 /**
  * Soportes del tema.

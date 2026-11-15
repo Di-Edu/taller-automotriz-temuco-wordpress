@@ -21,6 +21,7 @@ require TTA_DIR . 'includes/class-settings.php';
 require TTA_DIR . 'includes/class-booking.php';
 require TTA_DIR . 'includes/class-admin.php';
 require TTA_DIR . 'includes/class-form.php';
+require TTA_DIR . 'includes/class-stock.php';
 
 add_action(
 	'plugins_loaded',
@@ -29,6 +30,7 @@ add_action(
 		TTA_Booking::init();
 		TTA_Admin::init();
 		TTA_Form::init();
+		TTA_Stock::init();
 	}
 );
 

@@ -243,3 +243,39 @@ p{margin:0 0 1em}
 @media (min-width:900px){.mobile-cta{display:none}}
 
 /* La agenda trae sus propios estilos (plugin Taller Agenda → assets/agenda.css) y usa --brand. */
+
+/* ---------- Carrito en el encabezado ---------- */
+.header-tools{display:flex;align-items:center;gap:8px}
+@media (min-width:1080px){.header-tools{order:3}.main-nav{margin-left:auto}}
+.header-cart{position:relative;display:inline-grid;place-items:center;width:44px;height:44px;border-radius:10px;color:var(--ink);border:1px solid var(--line);background:#fff}
+.header-cart:hover{border-color:var(--brand);color:var(--brand)}
+.cart-count{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--brand);color:#fff;font-size:.72rem;font-weight:800;display:grid;place-items:center}
+.cart-count.is-empty{display:none}
+
+/* ---------- Tienda (WooCommerce) ---------- */
+.product-card-price{font-weight:800;color:var(--ink);font-size:1.1rem;margin:0}
+.product-card-price del{color:var(--muted);font-weight:500;font-size:.9rem;margin-right:6px}
+.product-card-stock{font-size:.85rem;font-weight:700;margin:2px 0 10px}
+.product-card-stock.in{color:#15803d}.product-card-stock.out{color:#b42318}
+.section-shop{padding-top:40px}
+.woocommerce-wrap .woocommerce-result-count{color:var(--muted);font-size:.9rem}
+.woocommerce-wrap .woocommerce-ordering select{padding:8px 12px;border:1px solid var(--line);border-radius:10px;font:inherit}
+.woocommerce ul.products li.product{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px!important;text-align:left;transition:box-shadow .15s,transform .15s}
+.woocommerce ul.products li.product:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+.woocommerce ul.products li.product a img{border-radius:10px;margin-bottom:10px}
+.woocommerce ul.products li.product .woocommerce-loop-product__title{font-size:1rem!important;color:var(--ink);padding:0!important}
+.woocommerce ul.products li.product .price{color:var(--ink)!important;font-weight:800;font-size:1.05rem!important}
+.woocommerce a.button,.woocommerce button.button,.woocommerce input.button,.woocommerce #respond input#submit,
+.woocommerce a.button.alt,.woocommerce button.button.alt,.wc-block-components-button:not(.is-link){background:var(--brand)!important;color:#fff!important;border-radius:999px!important;font-weight:700!important;padding:.7em 1.3em!important;border:0!important}
+.woocommerce a.button:hover,.woocommerce button.button:hover{filter:brightness(.95)}
+.woocommerce span.onsale{background:var(--brand);border-radius:999px;min-height:auto;min-width:auto;padding:4px 10px;line-height:1.4}
+.woocommerce div.product .product_title{font-size:clamp(1.6rem,3vw,2.2rem)}
+.woocommerce div.product p.price,.woocommerce div.product span.price{color:var(--ink);font-weight:800;font-size:1.5rem}
+.woocommerce div.product .stock{font-weight:700}
+.woocommerce div.product .stock.in-stock{color:#15803d}
+.woocommerce div.product form.cart .qty{padding:10px;border:1px solid var(--line);border-radius:10px;width:4.5em}
+.woocommerce .quantity .qty{font:inherit}
+.product-wa{margin-top:16px}
+.woocommerce-message,.woocommerce-info{border-top-color:var(--brand)!important}
+.woocommerce-message::before,.woocommerce-info::before{color:var(--brand)!important}
+.tt-thankyou-booking{background:color-mix(in srgb,var(--brand) 8%,#fff);border:1px solid color-mix(in srgb,var(--brand) 35%,#fff);border-radius:var(--radius);padding:18px 20px;margin-bottom:24px}

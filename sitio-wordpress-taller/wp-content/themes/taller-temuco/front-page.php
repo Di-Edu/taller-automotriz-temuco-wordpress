@@ -121,6 +121,60 @@ $hero_img = tt_opt( 'hero_image' );
 	</div>
 </section>
 
+<?php
+if ( function_exists( 'tt_has_woo' ) && tt_has_woo() ) :
+	$tt_products = wc_get_products(
+		array(
+			'status'   => 'publish',
+			'limit'    => 4,
+			'featured' => true,
+		)
+	);
+	if ( ! $tt_products ) {
+		$tt_products = wc_get_products(
+			array(
+				'status'  => 'publish',
+				'limit'   => 4,
+				'orderby' => 'date',
+				'order'   => 'DESC',
+			)
+		);
+	}
+	if ( $tt_products ) :
+		?>
+		<section class="section section-alt" id="tienda">
+			<div class="container">
+				<header class="section-head">
+					<p class="kicker"><?php esc_html_e( 'Tienda online', 'taller-temuco' ); ?></p>
+					<h2><?php esc_html_e( 'Repuestos y packs de servicio', 'taller-temuco' ); ?></h2>
+					<p><?php esc_html_e( 'Compra online y retira en tu sucursal, o déjalo instalado en tu próxima hora.', 'taller-temuco' ); ?></p>
+				</header>
+				<div class="cards">
+					<?php foreach ( $tt_products as $p ) : ?>
+						<a class="card product-card" href="<?php echo esc_url( $p->get_permalink() ); ?>">
+							<?php
+							$img = $p->get_image_id();
+							if ( $img ) {
+								echo wp_get_attachment_image( $img, 'woocommerce_thumbnail', false, array( 'loading' => 'lazy' ) );
+							} else {
+								echo '<span class="card-icon">' . tt_icon( 'wrench' ) . '</span>'; // phpcs:ignore
+							}
+							?>
+							<h3><?php echo esc_html( $p->get_name() ); ?></h3>
+							<p class="product-card-price"><?php echo wp_kses_post( $p->get_price_html() ); ?></p>
+							<p class="product-card-stock <?php echo $p->is_in_stock() ? 'in' : 'out'; ?>"><?php echo $p->is_in_stock() ? esc_html__( 'Disponible', 'taller-temuco' ) : esc_html__( 'Agotado', 'taller-temuco' ); ?></p>
+							<span class="card-link"><?php esc_html_e( 'Ver producto', 'taller-temuco' ); ?> <?php echo tt_icon( 'arrow' ); // phpcs:ignore ?></span>
+						</a>
+					<?php endforeach; ?>
+				</div>
+				<p class="center"><a class="btn btn-primary btn-lg" href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>"><?php esc_html_e( 'Ver toda la tienda', 'taller-temuco' ); ?></a></p>
+			</div>
+		</section>
+		<?php
+	endif;
+endif;
+?>
+
 <section class="section section-dark">
 	<div class="container">
 		<header class="section-head">

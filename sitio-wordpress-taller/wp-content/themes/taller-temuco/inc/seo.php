@@ -22,7 +22,7 @@ function tt_seo_plugin_active() {
  * Registra los metadatos para que también funcionen en el editor de bloques / REST.
  */
 function tt_register_seo_meta() {
-	foreach ( array( 'page', 'post' ) as $type ) {
+	foreach ( array( 'page', 'post', 'product' ) as $type ) {
 		foreach ( array( '_tt_seo_title', '_tt_seo_desc' ) as $key ) {
 			register_post_meta(
 				$type,
@@ -49,7 +49,7 @@ function tt_seo_add_box() {
 	if ( tt_seo_plugin_active() ) {
 		return;
 	}
-	foreach ( array( 'page', 'post' ) as $type ) {
+	foreach ( array( 'page', 'post', 'product' ) as $type ) {
 		add_meta_box( 'tt_seo', __( 'SEO (Google)', 'taller-temuco' ), 'tt_seo_box_html', $type, 'normal', 'high' );
 	}
 }

@@ -48,9 +48,12 @@ defined( 'ABSPATH' ) || exit;
 			?>
 		</a>
 
+		<div class="header-tools">
+		<?php echo tt_cart_link(); // phpcs:ignore -- HTML generado y escapado en tt_cart_link() ?>
 		<button class="nav-toggle" aria-expanded="false" aria-controls="menu-principal">
 			<?php echo tt_icon( 'menu' ); // phpcs:ignore ?><span class="screen-reader-text"><?php esc_html_e( 'Menú', 'taller-temuco' ); ?></span>
 		</button>
+		</div>
 
 		<nav class="main-nav" id="menu-principal" aria-label="<?php esc_attr_e( 'Principal', 'taller-temuco' ); ?>">
 			<?php
