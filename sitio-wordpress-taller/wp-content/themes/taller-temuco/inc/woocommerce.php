@@ -71,7 +71,13 @@ function tt_woo_hooks() {
 	add_action( 'woocommerce_single_product_summary', 'tt_product_whatsapp', 35 );
 	add_action( 'woocommerce_thankyou', 'tt_thankyou_booking', 5 );
 	add_action( 'wp_enqueue_scripts', 'tt_woo_trim_assets', 99 );
-	add_action( 'save_post_tt_sucursal', 'tt_sync_pickup_locations', 20 );
+	add_action(
+		'save_post_tt_sucursal',
+		function () {
+			tt_sync_pickup_locations( false );
+		},
+		20
+	);
 	add_action( 'admin_init', 'tt_woo_first_run' );
 }
 
@@ -158,8 +164,10 @@ function tt_woo_trim_assets() {
 /**
  * Publica las sucursales como puntos de retiro del checkout de WooCommerce ("Retiro en sucursal").
  * Se ejecuta al guardar una sucursal y la primera vez que se activa WooCommerce.
+ *
+ * @param bool $enable Activar el método "Retiro en sucursal" (solo la primera vez; luego decide el cliente).
  */
-function tt_sync_pickup_locations() {
+function tt_sync_pickup_locations( $enable = false ) {
 	if ( ! tt_has_woo() || ! function_exists( 'tt_branches' ) ) {
 		return;
 	}
@@ -187,15 +195,21 @@ function tt_sync_pickup_locations() {
 	}
 	update_option( 'pickup_location_pickup_locations', $locations );
 
-	$settings = get_option( 'woocommerce_pickup_location_settings', array() );
-	if ( empty( $settings ) ) {
+	// WooCommerce crea estos ajustes desactivados al instalarse: la primera vez se activan.
+	if ( $enable ) {
+		$settings = (array) get_option( 'woocommerce_pickup_location_settings', array() );
 		update_option(
 			'woocommerce_pickup_location_settings',
-			array(
-				'enabled'    => 'yes',
-				'title'      => __( 'Retiro en sucursal', 'taller-temuco' ),
-				'tax_status' => 'taxable',
-				'cost'       => '',
+			array_merge(
+				array(
+					'tax_status' => 'taxable',
+					'cost'       => '',
+				),
+				$settings,
+				array(
+					'enabled' => 'yes',
+					'title'   => __( 'Retiro en sucursal', 'taller-temuco' ),
+				)
 			)
 		);
 	}
@@ -213,7 +227,7 @@ function tt_woo_first_run() {
 		return; // WooCommerce aún no crea sus páginas.
 	}
 	update_option( 'tt_woo_ready', 1 );
-	tt_sync_pickup_locations();
+	tt_sync_pickup_locations( true );
 
 	$locations = get_nav_menu_locations();
 	if ( ! empty( $locations['primary'] ) ) {
