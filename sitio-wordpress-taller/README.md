@@ -6,7 +6,7 @@ Incluye un **tema a medida** (`taller-temuco`) y un **plugin de agenda** (`talle
 
 ### ▶ [Ver demo en vivo](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/Di-Edu/taller-automotriz-temuco-wordpress/main/sitio-wordpress-taller/blueprint.json)
 
-La demo instala el tema y el plugin en un WordPress temporal dentro del navegador (WordPress Playground), sin instalar nada. Tarda unos 20 segundos y ya queda con sesión de administrador, así que puedes probar el Home, el mapa de sucursales, las páginas de servicio, agendar una hora en el calendario y verla en **Citas → Calendario** del escritorio. La demo incluye una segunda sucursal y citas de ejemplo para que se vean días ocupados y completos. Los datos se borran al cerrar la pestaña.
+La demo instala el tema y el plugin en un WordPress temporal dentro del navegador (WordPress Playground), sin instalar nada. Tarda unos 20 segundos y ya queda con sesión de administrador, así que puedes probar el Home, el mapa de sucursales, las páginas de servicio, agendar una hora en el calendario y verla en **Citas → Calendario** del escritorio. La demo incluye una segunda sucursal, citas de ejemplo para que se vean días ocupados y completos, y una **tienda WooCommerce con productos de ejemplo** (prueba comprar el "Pack Mantención 10.000 km" con retiro en sucursal). La primera carga tarda un poco más porque instala WooCommerce. Los datos se borran al cerrar la pestaña.
 
 ---
 
@@ -21,8 +21,9 @@ La demo instala el tema y el plugin en un WordPress temporal dentro del navegado
 | Sistema de agenda simple | Plugin **Taller Agenda**: shortcode `[taller_agenda]` con **calendario mensual de disponibilidad** (cada día en verde = disponible, ámbar = pocos cupos, rojo = completo, gris = sin atención) y horarios del día marcados como libres u ocupados, en tiempo real. Cupos por horario y **por sucursal**, días de atención, feriados bloqueados, aviso por correo al taller y al cliente. En el escritorio: **Citas → Calendario** (vista mensual con las citas de cada día y los horarios libres), listado con estados (pendiente / confirmada / atendida / cancelada), botón "Confirmar por WhatsApp" y widget de próximas citas. Anti-spam con honeypot, nonce y límite por IP. |
 | Ubicación y sucursales (adicional) | Menú **Sucursales**: el cliente agrega cada local con dirección, horario, teléfono y WhatsApp, y lo ubica **haciendo clic en un mapa** o con "Buscar dirección". Aparecen solas en un **mapa interactivo** (OpenStreetMap, sin API key ni costo) en el Home y en Contacto, con botones **Cómo llegar** (Google Maps), **Waze**, Llamar y WhatsApp por sucursal. Acceso rápido "Cómo llegar / Ver mapa" en la barra superior y botón **Ubicación** en la barra móvil. Cada sucursal se declara en los datos estructurados de Google, y la agenda permite elegir sucursal. |
 | SEO básico | Caja **SEO (Google)** en cada página con título y meta descripción (contador de caracteres), Open Graph, etiquetas geo, schema `AutoRepair` (negocio local), URLs amigables `/%postname%/`. Si se instala Yoast o Rank Math, el módulo se desactiva solo para no duplicar. |
-| Velocidad de carga | Sin jQuery ni fuentes externas (fuente del sistema), íconos SVG en línea, JS ≈1 KB con `defer`, CSS único ≈15 KB, se eliminan emojis y scripts innecesarios de WordPress, CSS de bloques solo cuando se usan, el mapa (Leaflet) se descarga solo al llegar a esa sección, el JS/CSS de la agenda solo en la página de agenda, imágenes `lazy` + `decoding=async`, precarga de la imagen principal. |
+| Velocidad de carga | Sin jQuery ni fuentes externas (fuente del sistema), íconos SVG en línea, JS ≈4 KB con `defer`, CSS único ≈20 KB, se eliminan emojis y scripts innecesarios de WordPress, CSS de bloques solo cuando se usan, el mapa (Leaflet) se descarga solo al llegar a esa sección, el JS/CSS de la agenda solo en la página de agenda, imágenes `lazy` + `decoding=async`, precarga de la imagen principal. |
 | Diseño profesional, moderno y responsive | Diseño mobile-first, accesible (skip-link, foco visible, `aria-*`, `prefers-reduced-motion`), menú desplegable, tarjetas y CTA consistentes. |
+| Tienda online y control de stock (adicional, 100% gratuito) | Integración con **WooCommerce** (gratis): tienda con el diseño del tema, carrito con contador en el encabezado, precios en CLP, stock con alerta de stock bajo, productos destacados en el Home y botón **"Consultar por WhatsApp"** en cada producto. Las sucursales se publican solas como puntos de **Retiro en sucursal** en el checkout. **Control de stock del taller:** en cada cita se registran los repuestos usados y se descuentan del inventario al marcarla "Atendida" (y se devuelven si cambia el estado o se elimina), así el stock refleja las ventas online y lo usado en el taller. Al comprar un **pack de servicio** la página de confirmación invita a agendar la hora. Los archivos de WooCommerce solo se cargan en las páginas de tienda. |
 | Entrega de accesos | Ver [`ENTREGA.md`](ENTREGA.md): checklist de traspaso de hosting, WordPress, base de datos, dominio y correo. |
 
 Bonus: los clics en WhatsApp / llamar / agendar se envían como eventos a Google Analytics 4 o Tag Manager si el cliente los instala (atributo `data-track`).
@@ -46,6 +47,7 @@ sitio-wordpress-taller/
     │   ├── inc/
     │   │   ├── customizer.php         # Opciones autoadministrables
     │   │   ├── branches.php           # Sucursales + mapa interactivo
+    │   │   ├── woocommerce.php        # Tienda: carrito, retiro en sucursal, WhatsApp por producto
     │   │   ├── seo.php                # Títulos, meta descripciones, OG, schema
     │   │   ├── performance.php        # Optimización de carga
     │   │   ├── setup-content.php      # Crea páginas, servicios y menú al activar
@@ -53,7 +55,7 @@ sitio-wordpress-taller/
     │   └── assets/ (css, js)
     └── plugins/taller-agenda/
         ├── taller-agenda.php
-        ├── includes/ (settings, booking, form, admin + calendario)
+        ├── includes/ (settings, booking, form, admin + calendario, stock de repuestos)
         └── assets/ (agenda.js, agenda.css: calendario de disponibilidad)
 ```
 
@@ -87,6 +89,20 @@ sitio-wordpress-taller/
 - **Ver y confirmar citas:** menú **Citas** (listado) o **Citas → Calendario** (vista mensual). Cambia el estado y usa *Confirmar por WhatsApp*.
 - **Agregar una sucursal:** menú **Sucursales → Agregar sucursal**: completa los datos y haz clic en el mapa donde está el local. Aparece sola en el mapa del sitio y en la agenda.
 - **Bloquear feriados o vacaciones:** Citas → Ajustes → Días bloqueados.
+- **Agregar un producto:** Productos → Añadir nuevo. Precio, foto y, en "Inventario", activa *Gestionar inventario* e indica el stock. Marca la estrella ⭐ para destacarlo en el Home.
+- **Registrar repuestos usados en una cita:** abre la cita → caja *Repuestos utilizados* → agrega producto y cantidad → marca la cita como *Atendida*. El stock se descuenta solo.
+- **Packs de servicio:** crea el producto en la categoría *Packs de servicio* (slug `packs-de-servicio`); al comprarlo, el cliente ve el botón para agendar.
+
+## Tienda: pagos y despacho (todo gratuito)
+
+1. Instala **WooCommerce** (Plugins → Añadir nuevo). El tema detecta la tienda solo, agrega "Tienda" al menú y publica las sucursales como puntos de retiro.
+2. **Pagos con tarjeta en Chile** (plugins gratuitos, solo se paga la comisión por venta):
+   - **Transbank Webpay Plus** (plugin oficial *Transbank Webpay REST*): débito, crédito y prepago. Viene en modo integración (pruebas) y luego se pasa a producción con el código de comercio.
+   - **Mercado Pago** (plugin oficial) o **Flow**.
+   - Incluidos en WooCommerce: transferencia bancaria y pago al retirar.
+3. **Despacho a domicilio:** WooCommerce → Ajustes → Envío → crea la zona "Temuco y alrededores" con *Tarifa plana* o *Envío gratuito* desde cierto monto.
+4. **Moneda:** WooCommerce → Ajustes → General → Peso chileno, 0 decimales, separador de miles ".".
+5. **Boleta electrónica (SII):** se puede conectar más adelante con un proveedor de facturación (Bsale, OpenFactura, LibreDTE); estos servicios tienen costo propio.
 
 ## Requisitos técnicos
 

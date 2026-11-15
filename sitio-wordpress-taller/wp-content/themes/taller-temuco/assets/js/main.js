@@ -1,4 +1,4 @@
-/* Taller Temuco — JS mínimo (≈1 KB), sin dependencias. */
+/* Taller Temuco — JS mínimo (≈4 KB), sin dependencias. */
 (function () {
   'use strict';
 
