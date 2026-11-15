@@ -6,7 +6,7 @@ Incluye un **tema a medida** (`taller-temuco`) y un **plugin de agenda** (`talle
 
 ### ▶ [Ver demo en vivo](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/Di-Edu/taller-automotriz-temuco-wordpress/main/sitio-wordpress-taller/blueprint.json)
 
-La demo instala el tema y el plugin en un WordPress temporal dentro del navegador (WordPress Playground), sin instalar nada. Tarda unos 20 segundos y ya queda con sesión de administrador, así que puedes probar el Home, las páginas de servicio, agendar una hora y verla en el menú **Citas** del escritorio. Los datos se borran al cerrar la pestaña.
+La demo instala el tema y el plugin en un WordPress temporal dentro del navegador (WordPress Playground), sin instalar nada. Tarda unos 20 segundos y ya queda con sesión de administrador, así que puedes probar el Home, el mapa de sucursales, las páginas de servicio, agendar una hora en el calendario y verla en **Citas → Calendario** del escritorio. La demo incluye una segunda sucursal y citas de ejemplo para que se vean días ocupados y completos. Los datos se borran al cerrar la pestaña.
 
 ---
 
@@ -18,9 +18,10 @@ La demo instala el tema y el plugin en un WordPress temporal dentro del navegado
 | Home optimizado para conversión | Portada con propuesta de valor + 2 CTA (agendar / WhatsApp), accesos rápidos por servicio, cifras de confianza, "por qué elegirnos", proceso en 3 pasos, testimonios, cobertura + mapa y CTA final. En móvil: barra fija inferior con **Llamar · WhatsApp · Agendar**. |
 | 6–8 páginas de servicio con SEO local | Al activar el tema se crean **8 páginas** con contenido orientado a Temuco y alrededores (Padre Las Casas, Labranza, Lautaro…): mantención, frenos, scanner, suspensión y dirección, alineación y balanceo, embrague, aire acondicionado, pre revisión técnica. Cada una con H1 "servicio + en Temuco", título SEO, meta descripción, preguntas frecuentes, enlazado interno y schema `Service` + `BreadcrumbList`. |
 | Botón de WhatsApp | Botón flotante en todas las páginas + botones en portada, servicios y CTA, con **mensaje prellenado según el servicio**. Número y mensaje configurables. |
-| Sistema de agenda simple | Plugin **Taller Agenda**: shortcode `[taller_agenda]`, horarios disponibles en tiempo real, cupos por bloque, días de atención, feriados bloqueados, aviso por correo al taller y al cliente, listado de citas con estados (pendiente / confirmada / atendida / cancelada), botón "Confirmar por WhatsApp" y widget de próximas citas. Anti-spam con honeypot, nonce y límite por IP. |
+| Sistema de agenda simple | Plugin **Taller Agenda**: shortcode `[taller_agenda]` con **calendario mensual de disponibilidad** (cada día en verde = disponible, ámbar = pocos cupos, rojo = completo, gris = sin atención) y horarios del día marcados como libres u ocupados, en tiempo real. Cupos por horario y **por sucursal**, días de atención, feriados bloqueados, aviso por correo al taller y al cliente. En el escritorio: **Citas → Calendario** (vista mensual con las citas de cada día y los horarios libres), listado con estados (pendiente / confirmada / atendida / cancelada), botón "Confirmar por WhatsApp" y widget de próximas citas. Anti-spam con honeypot, nonce y límite por IP. |
+| Ubicación y sucursales (adicional) | Menú **Sucursales**: el cliente agrega cada local con dirección, horario, teléfono y WhatsApp, y lo ubica **haciendo clic en un mapa** o con "Buscar dirección". Aparecen solas en un **mapa interactivo** (OpenStreetMap, sin API key ni costo) en el Home y en Contacto, con botones **Cómo llegar** (Google Maps), **Waze**, Llamar y WhatsApp por sucursal. Acceso rápido "Cómo llegar / Ver mapa" en la barra superior y botón **Ubicación** en la barra móvil. Cada sucursal se declara en los datos estructurados de Google, y la agenda permite elegir sucursal. |
 | SEO básico | Caja **SEO (Google)** en cada página con título y meta descripción (contador de caracteres), Open Graph, etiquetas geo, schema `AutoRepair` (negocio local), URLs amigables `/%postname%/`. Si se instala Yoast o Rank Math, el módulo se desactiva solo para no duplicar. |
-| Velocidad de carga | Sin jQuery ni fuentes externas (fuente del sistema), íconos SVG en línea, JS ≈1 KB con `defer`, CSS único ≈15 KB, se eliminan emojis y scripts innecesarios de WordPress, CSS de bloques solo cuando se usan, mapa de Google cargado bajo demanda, imágenes `lazy` + `decoding=async`, precarga de la imagen principal. |
+| Velocidad de carga | Sin jQuery ni fuentes externas (fuente del sistema), íconos SVG en línea, JS ≈1 KB con `defer`, CSS único ≈15 KB, se eliminan emojis y scripts innecesarios de WordPress, CSS de bloques solo cuando se usan, el mapa (Leaflet) se descarga solo al llegar a esa sección, el JS/CSS de la agenda solo en la página de agenda, imágenes `lazy` + `decoding=async`, precarga de la imagen principal. |
 | Diseño profesional, moderno y responsive | Diseño mobile-first, accesible (skip-link, foco visible, `aria-*`, `prefers-reduced-motion`), menú desplegable, tarjetas y CTA consistentes. |
 | Entrega de accesos | Ver [`ENTREGA.md`](ENTREGA.md): checklist de traspaso de hosting, WordPress, base de datos, dominio y correo. |
 
@@ -38,12 +39,13 @@ sitio-wordpress-taller/
     ├── themes/taller-temuco/
     │   ├── front-page.php             # Home de conversión
     │   ├── page-servicio.php          # Plantilla de servicio (SEO local)
-    │   ├── page-contacto.php          # Contacto + mapa
+    │   ├── page-contacto.php          # Contacto + mapa de sucursales
     │   ├── page.php · index.php · 404.php
     │   ├── header.php · footer.php    # Menú, WhatsApp flotante, barra móvil
     │   ├── template-parts/            # CTA, mapa diferido, migas de pan
     │   ├── inc/
     │   │   ├── customizer.php         # Opciones autoadministrables
+    │   │   ├── branches.php           # Sucursales + mapa interactivo
     │   │   ├── seo.php                # Títulos, meta descripciones, OG, schema
     │   │   ├── performance.php        # Optimización de carga
     │   │   ├── setup-content.php      # Crea páginas, servicios y menú al activar
@@ -51,7 +53,8 @@ sitio-wordpress-taller/
     │   └── assets/ (css, js)
     └── plugins/taller-agenda/
         ├── taller-agenda.php
-        └── includes/ (settings, booking, form, admin)
+        ├── includes/ (settings, booking, form, admin + calendario)
+        └── assets/ (agenda.js, agenda.css: calendario de disponibilidad)
 ```
 
 ---
@@ -81,7 +84,8 @@ sitio-wordpress-taller/
 - **Cambiar textos del inicio, teléfono o WhatsApp:** Apariencia → Personalizar.
 - **Editar un servicio:** Páginas → (servicio) → editar texto, foto destacada y caja "SEO (Google)".
 - **Agregar un servicio nuevo:** Páginas → Añadir nueva → Atributos: Superior = *Servicios*, Plantilla = *Página de servicio (SEO local)*. Aparece solo en el Home, el pie de página y el formulario de agenda.
-- **Ver y confirmar citas:** menú **Citas**. Cambia el estado y usa *Confirmar por WhatsApp*.
+- **Ver y confirmar citas:** menú **Citas** (listado) o **Citas → Calendario** (vista mensual). Cambia el estado y usa *Confirmar por WhatsApp*.
+- **Agregar una sucursal:** menú **Sucursales → Agregar sucursal**: completa los datos y haz clic en el mapa donde está el local. Aparece sola en el mapa del sitio y en la agenda.
 - **Bloquear feriados o vacaciones:** Citas → Ajustes → Días bloqueados.
 
 ## Requisitos técnicos

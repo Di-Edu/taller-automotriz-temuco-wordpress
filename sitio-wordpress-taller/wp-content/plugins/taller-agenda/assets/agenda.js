@@ -7,6 +7,7 @@
   var fmtDay = new Intl.DateTimeFormat('es-CL', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
 
   function utc(iso) { return new Date(iso + 'T00:00:00Z'); }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function addMonths(ym, n) {
     var y = +ym.slice(0, 4), m = +ym.slice(5, 7) - 1 + n;
@@ -53,7 +54,7 @@
 
     function renderMonth() {
       var ym = view, key = ym + '|' + branch(), my = ++reqId;
-      title.textContent = fmtMonth.format(utc(ym + '-01'));
+      title.textContent = cap(fmtMonth.format(utc(ym + '-01')));
       navs[0].disabled = ym <= min.slice(0, 7);
       navs[1].disabled = ym >= max.slice(0, 7);
       grid.classList.add('is-loading');

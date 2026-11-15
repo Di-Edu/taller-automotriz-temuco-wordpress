@@ -20,7 +20,7 @@
 /* Calendario */
 .tta-cal{border:1px solid var(--tta-line);border-radius:12px;padding:12px}
 .tta-cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
-.tta-cal-title{font-weight:800;color:var(--tta-ink);text-transform:capitalize;font-size:1.05rem}
+.tta-cal-title{font-weight:800;color:var(--tta-ink);font-size:1.05rem}
 .tta-cal-nav{width:40px;height:40px;border-radius:50%;border:1px solid var(--tta-line);background:#fff;color:var(--tta-ink);font-size:1.3rem;line-height:1;cursor:pointer}
 .tta-cal-nav:disabled{opacity:.35;cursor:not-allowed}
 .tta-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;transition:opacity .15s}
@@ -45,7 +45,7 @@
 .tta-legend .is-free{background:var(--tta-free)}.tta-legend .is-few{background:var(--tta-few)}.tta-legend .is-full{background:var(--tta-full)}.tta-legend .is-closed{background:var(--tta-off)}
 
 /* Horarios */
-.tta-slots-title{margin:0 0 8px;font-weight:700;color:var(--tta-ink);text-transform:capitalize}
+.tta-slots-title{margin:0 0 8px;font-weight:700;color:var(--tta-ink)}
 .tta-slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
 .tta-slot{display:flex;flex-direction:column;align-items:center;padding:10px 6px;border-radius:10px;border:2px solid var(--tta-free);background:#fff;color:var(--tta-free);font:inherit;font-weight:800;cursor:pointer}
 .tta-slot small{font-size:.7rem;font-weight:600}

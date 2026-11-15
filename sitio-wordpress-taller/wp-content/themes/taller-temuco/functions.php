@@ -93,6 +93,25 @@ function tt_widgets() {
 add_action( 'widgets_init', 'tt_widgets' );
 
 /**
+ * Al activar el tema, WordPress mueve sus widgets por defecto (Archivos, Categorías…) al pie.
+ * Se desactivan una sola vez para que el pie se vea limpio; el cliente puede agregar los suyos.
+ */
+function tt_clear_default_widgets() {
+	if ( get_option( 'tt_widgets_cleared' ) ) {
+		return;
+	}
+	$sidebars = get_option( 'sidebars_widgets', array() );
+	if ( ! empty( $sidebars['footer-1'] ) ) {
+		$inactive                        = isset( $sidebars['wp_inactive_widgets'] ) ? (array) $sidebars['wp_inactive_widgets'] : array();
+		$sidebars['wp_inactive_widgets'] = array_merge( $inactive, (array) $sidebars['footer-1'] );
+		$sidebars['footer-1']            = array();
+		update_option( 'sidebars_widgets', $sidebars );
+	}
+	update_option( 'tt_widgets_cleared', 1 );
+}
+add_action( 'after_switch_theme', 'tt_clear_default_widgets', 30 );
+
+/**
  * Menú de respaldo si el cliente aún no crea uno.
  */
 function tt_fallback_menu() {

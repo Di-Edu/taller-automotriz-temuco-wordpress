@@ -7,7 +7,8 @@ Este repositorio reúne dos proyectos:
 Sitio WordPress 100% autoadministrable, orientado a conversión y SEO local:
 
 - Tema a medida **Taller Temuco**: Home de conversión, 8 páginas de servicio con SEO local, botón de WhatsApp, SEO básico (títulos, meta descripciones, schema `AutoRepair`) y optimización de velocidad.
-- Plugin **Taller Agenda**: reserva de horas con disponibilidad en tiempo real y gestión de citas en el escritorio de WordPress.
+- Plugin **Taller Agenda**: reserva de horas con calendario de disponibilidad (libre / ocupado) en tiempo real y calendario de citas en el escritorio de WordPress.
+- Mapa interactivo de sucursales con "Cómo llegar" (Google Maps / Waze), administrable desde WordPress.
 - Entorno local con Docker y checklist de entrega de accesos.
 
 **▶ [Ver demo en vivo](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/Di-Edu/taller-automotriz-temuco-wordpress/main/sitio-wordpress-taller/blueprint.json)** (WordPress temporal en el navegador, sin instalar nada).
