@@ -165,11 +165,15 @@ function tt_sync_pickup_locations() {
 	}
 	$locations = array();
 	foreach ( tt_branches( false ) as $b ) {
+		// "Av. Alemania 0000, Temuco, Araucanía" → calle y comuna por separado (evita repetirlas en el checkout).
+		$parts       = array_map( 'trim', explode( ',', $b['address'] ) );
+		$street      = array_shift( $parts );
+		$city        = $b['city'] ? $b['city'] : ( $parts ? $parts[0] : 'Temuco' );
 		$locations[] = array(
 			'name'    => $b['name'],
 			'address' => array(
-				'address_1' => $b['address'],
-				'city'      => $b['city'] ? $b['city'] : 'Temuco',
+				'address_1' => $street,
+				'city'      => $city,
 				'state'     => 'CL-AR',
 				'postcode'  => '',
 				'country'   => 'CL',
