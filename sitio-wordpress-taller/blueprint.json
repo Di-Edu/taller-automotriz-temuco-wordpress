@@ -1,0 +1,33 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/",
+  "preferredVersions": { "php": "8.2", "wp": "latest" },
+  "features": { "networking": true },
+  "steps": [
+    { "step": "login" },
+    { "step": "setSiteLanguage", "language": "es_CL" },
+    { "step": "setSiteOptions", "options": { "blogname": "Taller Automotriz Temuco", "blogdescription": "Servicio automotriz en Temuco" } },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "git:directory",
+        "url": "https://github.com/Di-Edu/taller-automotriz-temuco-wordpress",
+        "ref": "main",
+        "refType": "branch",
+        "path": "sitio-wordpress-taller/wp-content/plugins/taller-agenda"
+      },
+      "options": { "activate": true }
+    },
+    {
+      "step": "installTheme",
+      "themeData": {
+        "resource": "git:directory",
+        "url": "https://github.com/Di-Edu/taller-automotriz-temuco-wordpress",
+        "ref": "main",
+        "refType": "branch",
+        "path": "sitio-wordpress-taller/wp-content/themes/taller-temuco"
+      },
+      "options": { "activate": true }
+    }
+  ]
+}

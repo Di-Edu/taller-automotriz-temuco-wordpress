@@ -10,6 +10,8 @@ Sitio WordPress 100% autoadministrable, orientado a conversión y SEO local:
 - Plugin **Taller Agenda**: reserva de horas con disponibilidad en tiempo real y gestión de citas en el escritorio de WordPress.
 - Entorno local con Docker y checklist de entrega de accesos.
 
+**▶ [Ver demo en vivo](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/Di-Edu/taller-automotriz-temuco-wordpress/main/sitio-wordpress-taller/blueprint.json)** (WordPress temporal en el navegador, sin instalar nada).
+
 Detalle completo en [`sitio-wordpress-taller/README.md`](sitio-wordpress-taller/README.md).
 
 ## 2. Registro de Patentes

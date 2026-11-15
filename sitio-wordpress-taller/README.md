@@ -4,6 +4,10 @@ Sitio WordPress completo y **100% autoadministrable** para un taller / servicio 
 
 Incluye un **tema a medida** (`taller-temuco`) y un **plugin de agenda** (`taller-agenda`). No depende de constructores visuales pesados ni de servicios externos de pago.
 
+### ▶ [Ver demo en vivo](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/Di-Edu/taller-automotriz-temuco-wordpress/main/sitio-wordpress-taller/blueprint.json)
+
+La demo instala el tema y el plugin en un WordPress temporal dentro del navegador (WordPress Playground), sin instalar nada. Tarda unos 20 segundos y ya queda con sesión de administrador, así que puedes probar el Home, las páginas de servicio, agendar una hora y verla en el menú **Citas** del escritorio. Los datos se borran al cerrar la pestaña.
+
 ---
 
 ## Cómo cumple cada requisito
